@@ -1,0 +1,28 @@
+---
+apiVersion: polling.tekton.dev/v1alpha1
+kind: Repository
+metadata:
+  name: example-repository
+spec:
+  url: https://gitlab.consulting.redhat.com/mobb/c-2-c-boot
+  ref: test
+  frequency: 10s
+  type: github # can also be gitlab    
+  pipelineRef:
+    # serviceAccountName: demo-sa # Optional ServiceAccount to execute the pipeline
+    name: demo-pipeline
+    namespace: test-ns # optional: if provided, the pipelinerun will be created in this namespace to reference the pipeline.
+    params:
+    - name: sha
+      expression: commit.sha
+    - name: repoURL
+      expression: repoURL
+    workspaces:
+    - name: workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi

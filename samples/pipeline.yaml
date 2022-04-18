@@ -1,0 +1,38 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: echo-sha
+  namespace: test-ns
+spec:
+  params:
+    - name: sha
+      type: string
+  steps:
+    - image: registry.access.redhat.com/ubi8/ubi
+      command: ["echo"]
+      args: ["The sha is $(params.sha)"]
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: demo-pipeline
+  namespace: test-ns
+spec:
+  workspaces:
+  - name: workspace
+  params:
+  - name: sha
+    type: string
+    description: "the SHA of the recently detected change"
+  - name: repoURL
+    type: string
+    description: "the cloneURL that the change was detected in"    
+  tasks:
+  - name: test
+    params:
+    - name: sha
+      value: "$(params.sha)"
+    taskRef:
+      kind: Task
+      name: echo-sha
